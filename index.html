@@ -7,17 +7,25 @@
     <title>ORION version 1.0</title>
 
     <style>
-        body {
+        /* Reset & basic styling */
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             overflow: hidden;
             font-family: 'Orbitron', sans-serif;
             background: #000;
+            color: cyan;
         }
-        
+
         canvas {
             display: block;
         }
-        
+
+        /* Holo Panel */
         .holo-panel {
             position: absolute;
             top: 10%;
@@ -33,24 +41,26 @@
             text-shadow: 0 0 10px cyan;
             z-index: 5;
             animation: float 3s ease-in-out infinite;
+            width: 90%;
+            max-width: 400px;
         }
-        
+
         @keyframes float {
-            0%,
-            100% {
+            0%, 100% {
                 transform: translateX(-50%) translateY(-12px);
             }
             50% {
                 transform: translateX(-50%) translateY(10px);
             }
         }
-        
+
         .holo-title {
             font-size: 2rem;
             letter-spacing: 4px;
             margin-bottom: 10px;
         }
-        
+
+        /* Buttons */
         .holo-btn {
             margin: 8px;
             padding: 10px 22px;
@@ -61,22 +71,25 @@
             cursor: pointer;
             transition: 0.25s;
             text-shadow: 0 0 5px cyan;
-            size:
+            width: 100%;
+            max-width: 220px;
+            font-size: 1rem;
         }
-        
+
         .holo-btn:hover {
             background: cyan;
             color: black;
             box-shadow: 0 0 22px cyan;
             transform: scale(1.1);
         }
-        
+
+        /* Popups */
         .popup {
             position: absolute;
             left: 50%;
             bottom: 10%;
             transform: translateX(-50%) scale(0);
-            width: 80%;
+            width: 90%;
             max-width: 450px;
             padding: 20px;
             color: cyan;
@@ -88,9 +101,56 @@
             transition: 0.4s;
             box-shadow: 0 0 18px cyan;
         }
-        
+
         .popup.show {
             transform: translateX(-50%) scale(1);
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 900px) {
+            .holo-panel {
+                top: 8%;
+                padding: 20px 25px;
+            }
+
+            .holo-title {
+                font-size: 5vw;
+            }
+
+            .holo-btn {
+                font-size: 4vw;
+                max-width: 90%;
+                padding: 8px 15px;
+            }
+
+            .popup {
+                bottom: 8%;
+                font-size: 4vw;
+                padding: 15px;
+            }
+        }
+
+        @media only screen and (max-width: 600px) {
+            .holo-panel {
+                top: 5%;
+                padding: 15px 20px;
+            }
+
+            .holo-title {
+                font-size: 6vw;
+            }
+
+            .holo-btn {
+                font-size: 5vw;
+                max-width: 100%;
+                padding: 8px 12px;
+            }
+
+            .popup {
+                bottom: 5%;
+                font-size: 5vw;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -108,10 +168,10 @@
     <div id="popup-home" class="popup">In the <b>UNIVERSE</b> where ideas sleep...<br> one mind dares to wake them.<br> Welcome to <b>ORION</b> <br> where Beatus brings the digital universe to life</div>
     <div id="popup-skills" class="popup">He shapes code like steel....<br> sculpts interfaces like light.....<br> and bends creativity into form.<br> HTML,CSS,Javascript,Python
         <br> & animation <br> This is the arsenal of a new digital architect</div>
-    <div id="popup-projects" class="popup">From the heat-stricken fields of Mikese-Tanzania(field for excessive heat globally)<br> to the neon grids of futuristics UI<br> one creator builds,researches,designs,<br> and animates worlds into existence.<br> web systems,climate change solutions.<br>        animation shorts.<br>
+    <div id="popup-projects" class="popup">From the heat-stricken fields of Mikese-Tanzania(field for excessive heat globally)<br> to the neon grids of futuristics UI<br> one creator builds,researches,designs,<br> and animates worlds into existence.<br> web systems,climate change solutions.<br>
+        animation shorts.<br>
         <b>The journey has only begun</b></div>
     <div id="popup-contact" class="popup">Its more than a message<br> More than an invitation<br> It's a summons to creators,innovators,dreamer....<br> to those bold enough to craft realities<br> instead of waiting for them<br> check me on my social platform:<br>
-        <br>
         <br>
         <a class="holo-btn" href="https://github.com/nova0408-glitch" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a class="holo-btn" href="https://www.instagram.com/iam_blevy" target="_blank" rel="noopener noreferrer">Instagram</a></div>
@@ -129,8 +189,6 @@
         });
         renderer.setSize(innerWidth, innerHeight);
         document.body.appendChild(renderer.domElement);
-
-
 
         // Floating Hologram Rings
         let rings = [];
@@ -214,6 +272,5 @@
         });
     </script>
 </body>
-
 
 </html>
