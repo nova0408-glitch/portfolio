@@ -86,13 +86,15 @@
 
         /* Popups */
         .popup {
-            position: absolute;
+            position: fixed; /* Changed to fixed */
             left: 50%;
             bottom: 10%;
             transform: translateX(-50%) scale(0);
             width: 90%;
             max-width: 450px;
-            padding: 30px;
+            max-height: 70%; /* Limit height */
+            overflow-y: auto; /* Enable scrolling */
+            padding: 20px; /* Adjusted padding */
             color: cyan;
             border: 2px solid cyan;
             background: rgba(0, 255, 255, 0.08);
@@ -102,7 +104,7 @@
             transition: 0.4s;
             box-shadow: 0 0 18px cyan;
             display: flex;
-            flex-direction: column; /* Corrected to column */
+            flex-direction: column;
             align-items: center;
         }
 
@@ -275,3 +277,4 @@
 </body>
 
 </html>
+ability of the popups and prevent any overlap with the content. Adjust the content and styles further as needed to fit your design preferences.
