@@ -2,279 +2,286 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORION version 1.0</title>
-    <style>
-        /* Reset & basic styling */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORION version 1.0</title>
 
-        body {
-            overflow: hidden;
-            font-family: 'Orbitron', sans-serif;
-            background: #000;
-            color: cyan;
-        }
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;font-family:'Orbitron',sans-serif;background:#000;color:cyan}
+canvas{display:block}
 
-        canvas {
-            display: block;
-        }
+/* HOLO PANEL */
+.holo-panel{
+ position:absolute;
+ top:10%;
+ left:50%;
+ transform:translateX(-50%);
+ padding:25px 40px;
+ border:2px solid cyan;
+ border-radius:12px;
+ background:rgba(0,255,255,0.08);
+ backdrop-filter:blur(8px);
+ text-align:center;
+ text-shadow:0 0 10px cyan;
+ z-index:5;
+ animation:float 3s ease-in-out infinite;
+ width:90%;
+ max-width:400px
+}
+.holo-panel.hide{display:none}
 
-        /* Holo Panel */
-        .holo-panel {
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 25px 40px;
-            border: 2px solid cyan;
-            border-radius: 12px;
-            background: rgba(0, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            text-align: center;
-            color: cyan;
-            text-shadow: 0 0 10px cyan;
-            z-index: 5;
-            animation: float 3s ease-in-out infinite;
-            width: 90%;
-            max-width: 400px;
-        }
+@keyframes float{
+ 0%,100%{transform:translateX(-50%) translateY(-20px)}
+ 50%{transform:translateX(-50%) translateY(22px)}
+}
 
-        @keyframes float {
-            0%,
-            100% {
-                transform: translateX(-50%) translateY(-20px);
-            }
+.holo-title{
+ font-size:2rem;
+ letter-spacing:4px;
+ margin-bottom:20px
+}
 
-            50% {
-                transform: translateX(-50%) translateY(22px);
-            }
-        }
+.holo-btn,.next-btn{
+ margin:8px;
+ padding:10px 22px;
+ background:rgba(0,255,255,0.15);
+ border:1px solid cyan;
+ border-radius:8px;
+ color:cyan;
+ cursor:pointer;
+ transition:.25s;
+ text-shadow:0 0 5px cyan;
+ width:100%;
+ max-width:220px
+}
 
-        .holo-title {
-            font-size: 2rem;
-            letter-spacing: 4px;
-            margin-bottom: 20px; /* Increased margin for better spacing */
-        }
+.holo-btn:hover,.next-btn:hover{
+ background:cyan;
+ color:black;
+ box-shadow:0 0 22px cyan;
+ transform:scale(1.05)
+}
 
-        /* Buttons */
-        .holo-btn {
-            margin: 8px;
-            padding: 10px 22px;
-            background: rgba(0, 255, 255, 0.15);
-            border: 1px solid cyan;
-            border-radius: 8px;
-            color: cyan;
-            cursor: pointer;
-            transition: 0.25s;
-            text-shadow: 0 0 5px cyan;
-            width: 100%;
-            max-width: 220px;
-            font-size: 1rem;
-        }
+/* POPUPS */
+.popup{
+ position:fixed;
+ inset:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ opacity:0;
+ pointer-events:none;
+ transition:opacity .3s ease;
+ z-index:6
+}
+.popup.show{
+ opacity:1;
+ pointer-events:auto
+}
+.popup-content{
+ width:90%;
+ max-width:450px;
+ max-height:75%;
+ overflow-y:auto;
+ padding:20px;
+ border:2px solid cyan;
+ background:rgba(0,255,255,0.08);
+ backdrop-filter:blur(8px);
+ border-radius:12px;
+ text-align:center;
+ box-shadow:0 0 18px cyan
+}
 
-        .holo-btn:hover {
-            background: cyan;
-            color: black;
-            box-shadow: 0 0 22px cyan;
-            transform: scale(1.1);
-        }
-
-        /* Popups */
-        .popup {
-            position: fixed; /* Changed to fixed */
-            left: 50%;
-            bottom: 10%;
-            transform: translateX(-50%) scale(0);
-            width: 90%;
-            max-width: 450px;
-            max-height: 70%; /* Limit height */
-            overflow-y: auto; /* Enable scrolling */
-            padding: 20px; /* Adjusted padding */
-            color: cyan;
-            border: 2px solid cyan;
-            background: rgba(0, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
-            text-align: center;
-            transition: 0.4s;
-            box-shadow: 0 0 18px cyan;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .popup.show {
-            transform: translateX(-50%) scale(1);
-        }
-
-        /* Responsive adjustments */
-        @media only screen and (max-width: 900px) {
-            .holo-panel {
-                top: 8%;
-                padding: 20px 25px;
-            }
-
-            .holo-title {
-                font-size: 2rem;
-                letter-spacing: 4px;
-                margin-bottom: 20px;
-            }
-
-            .holo-btn {
-                font-size: 4vw;
-                max-width: 90%;
-                padding: 8px 15px;
-            }
-
-            .popup {
-                bottom: 8%;
-                font-size: 4vw;
-                padding: 15px;
-            }
-        }
-
-        @media only screen and (max-width: 600px) {
-            .holo-panel {
-                top: 5%;
-                padding: 15px 20px;
-            }
-
-            .holo-title {
-                font-size: 6vw;
-            }
-
-            .holo-btn {
-                font-size: 5vw;
-                max-width: 100%;
-                padding: 8px 12px;
-            }
-
-            .popup {
-                bottom: 5%;
-                font-size: 5vw;
-                padding: 12px;
-            }
-        }
-    </style>
+@media(max-width:600px){
+ .holo-title{font-size:6vw}
+ .holo-btn,.next-btn{font-size:5vw}
+}
+</style>
 </head>
 
 <body>
 
-    <div class="holo-panel">
-        <div class="holo-title">ORION version 1.0</div>
-        <button class="holo-btn" onclick="showSection('home')"><b>THE AWAKENING</b></button>
-        <button class="holo-btn" onclick="showSection('skills')">THE ARCHITECT</button>
-        <button class="holo-btn" onclick="showSection('projects')">THE MISSION</button>
-        <button class="holo-btn" onclick="showSection('contact')">THE CALL</button>
-    </div>
+<div class="holo-panel" id="mainMenu">
+ <div class="holo-title">ORION version 1.0</div>
+ <button class="holo-btn" onclick="showSection('home')"><b>THE AWAKENING</b></button>
+ <button class="holo-btn" onclick="showSection('skills')">THE ARCHITECT</button>
+ <button class="holo-btn" onclick="showSection('projects')">THE MISSION</button>
+ <button class="holo-btn" onclick="showSection('contact')">THE CALL</button>
+</div>
 
-    <div id="popup-home" class="popup">In the <b>UNIVERSE</b> where ideas sleep...<br> one mind dares to wake them.<br> Welcome to <b>ORION</b> <br> where Beatus brings the digital universe to life</div>
-    <div id="popup-skills" class="popup">He shapes code like steel....<br> sculpts interfaces like light.....<br> and bends creativity into form.<br> HTML, CSS, JavaScript, Python<br> & animation <br> This is the arsenal of a new digital architect</div>
-    <div id="popup-projects" class="popup">From the heat-stricken fields of Mikese-Tanzania (field for excessive heat globally)<br> to the neon grids of futuristic UI<br> one creator builds, researches, designs,<br> and animates worlds into existence.<br> web systems, climate change solutions.<br> animation shorts.<br><b>The journey has only begun</b></div>
-    <div id="popup-contact" class="popup">It's more than a message<br> More than an invitation<br> It's a summons to creators, innovators, dreamers....<br> to those bold enough to craft realities<br> instead of waiting for them.<br> Check me on my social platform:<br>
-        <p><b>Email: leverianbeatus@gmail.com</b></p>
-        <a class="holo-btn" href="https://github.com/nova0408-glitch" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a class="holo-btn" href="https://www.instagram.com/iam_blevy" target="_blank" rel="noopener noreferrer">Instagram</a>
-    </div>
+<!-- POPUPS CONTENT -->
+<div id="popup-home" class="popup">
+ <div class="popup-content">
+  In the <b>UNIVERSE</b> where ideas sleep...<br>
+  one mind dares to wake them.<br>
+  Welcome to <b>ORION</b><br>
+  where Beatus brings the digital universe to life
+  <br><br>
+  <button class="next-btn" onclick="nextSection('home')"></button>
+ </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // Scene Setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 30);
+<div id="popup-skills" class="popup">
+ <div class="popup-content">
+  He shapes code like steel....<br>
+  sculpts interfaces like light.....<br>
+  and bends creativity into form.<br>
+  HTML, CSS, JavaScript, Python<br>
+  & animation <br>
+  This is the arsenal of a new digital architect
+  <br><br>
+  <button class="next-btn" onclick="nextSection('skills')"></button>
+ </div>
+</div>
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(innerWidth, innerHeight);
-        document.body.appendChild(renderer.domElement);
+<div id="popup-projects" class="popup">
+ <div class="popup-content">
+  From the heat-stricken fields of Mikese-Tanzania (field for excessive heat globally)<br>
+  to the neon grids of futuristic UI<br>
+  one creator builds, researches, designs,<br>
+  and animates worlds into existence.<br>
+  web systems, climate change solutions.<br>
+  animation shorts.<br>
+  <b>The journey has only begun</b>
+  <br><br>
+  <button class="next-btn" onclick="nextSection('projects')"></button>
+ </div>
+</div>
 
-        // Floating Hologram Rings
-        let rings = [];
-        for (let i = 0; i < 5; i++) {
-            let geo = new THREE.TorusGeometry(5 + i * 1.5, 0.1, 16, 100);
-            let mat = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.6,
-                wireframe: true
-            });
-            let ring = new THREE.Mesh(geo, mat);
-            ring.position.y = i * 1.2 - 1;
-            rings.push(ring);
-            scene.add(ring);
-        }
+<div id="popup-contact" class="popup">
+ <div class="popup-content">
+  It's more than a message<br>
+  More than an invitation<br>
+  It's a summons to creators, innovators, dreamers....<br>
+  to those bold enough to craft realities<br>
+  instead of waiting for them.<br>
+  Check me on my social platform:<br>
+  <p><b>Email: leverianbeatus@gmail.com</b></p>
+  <a class="holo-btn" href="https://github.com/nova0408-glitch" target="_blank">GitHub</a>
+  <a class="holo-btn" href="https://www.instagram.com/iam_blevy" target="_blank">Instagram</a>
+  <br><br>
+  <button class="next-btn" onclick="backToMenu()">Back to Menu</button>
+ </div>
+</div>
 
-        // Particles Field
-        const particles = new THREE.Group();
-        scene.add(particles);
-        for (let i = 0; i < 600; i++) {
-            let pGeo = new THREE.SphereGeometry(0.12, 6, 6);
-            let pMat = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.7
-            });
-            let p = new THREE.Mesh(pGeo, pMat);
-            p.position.set((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 40);
-            particles.add(p);
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* === SCENE === */
+const scene=new THREE.Scene()
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000)
+camera.position.set(0,5,30)
 
-        // Floating Neon Wires (Lines)
-        const wireMaterial = new THREE.LineBasicMaterial({
-            color: 0x00ffff,
-            transparent: true,
-            opacity: 0.3
-        });
-        for (let i = 0; i < 20; i++) {
-            let points = [];
-            for (let j = 0; j < 5; j++) {
-                points.push(new THREE.Vector3(Math.random() * 30 - 15, j * 2 - 5, Math.random() * 30 - 15));
-            }
-            let geometry = new THREE.BufferGeometry().setFromPoints(points);
-            let line = new THREE.Line(geometry, wireMaterial);
-            scene.add(line);
-        }
+const renderer=new THREE.WebGLRenderer({antialias:true})
+renderer.setSize(innerWidth,innerHeight)
+document.body.appendChild(renderer.domElement)
 
-        // Camera movement per section
-        let targetZ = 30;
+/* RINGS */
+const rings=[]
+for(let i=0;i<5;i++){
+ const r=new THREE.Mesh(
+  new THREE.TorusGeometry(5+i*1.5,0.1,16,100),
+  new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.6,wireframe:true})
+ )
+ r.position.y=i*1.2-1
+ rings.push(r)
+ scene.add(r)
+}
 
-        function showSection(section) {
-            document.querySelectorAll(".popup").forEach(p => p.classList.remove("show"));
-            document.getElementById("popup-" + section).classList.add("show");
-            targetZ = section === 'home' ? 30 : section === 'skills' ? 22 : section === 'projects' ? 15 : 18;
-        }
+/* PARTICLES */
+const particles=new THREE.Group()
+scene.add(particles)
+for(let i=0;i<600;i++){
+ const p=new THREE.Mesh(
+  new THREE.SphereGeometry(.12,6,6),
+  new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.7})
+ )
+ p.position.set((Math.random()-.5)*40,(Math.random()-.5)*20,(Math.random()-.5)*40)
+ particles.add(p)
+}
 
-        // Animate
-        function animate() {
-            requestAnimationFrame(animate);
+/* WIRES */
+const wireMat=new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:.3})
+for(let i=0;i<20;i++){
+ const pts=[]
+ for(let j=0;j<5;j++)pts.push(new THREE.Vector3(Math.random()*30-15,j*2-5,Math.random()*30-15))
+ const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),wireMat)
+ scene.add(line)
+}
 
-            // Rotate rings
-            rings.forEach((r, i) => r.rotation.y += 0.002 + i * 0.001);
-            particles.rotation.y += 0.001;
+/* === SEQUENTIAL LOGIC WITH ACTUAL TITLES + CAMERA ANGLES === */
+const sections=['home','skills','projects','contact']
+const titles=['THE ARCHITECT','THE MISSION','THE CALL','Back to Menu']
 
-            // Camera smooth movement
-            camera.position.z += (targetZ - camera.position.z) * 0.05;
-            camera.position.x += (0 - camera.position.x) * 0.05;
-            camera.position.y = (3 - camera.position.y) * 0.05;
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
+// predefined camera positions and lookAt targets for each section
+const cameraPositions = {
+ home: {x:0, y:5, z:20, lookAtX:0, lookAtY:0, lookAtZ:0},
+ skills: {x:4, y:6, z:18, lookAtX:1, lookAtY:1, lookAtZ:0},
+ projects: {x:-3, y:7, z:15, lookAtX:-1, lookAtY:0.5, lookAtZ:1},
+ contact: {x:0, y:4, z:17, lookAtX:0, lookAtY:2.5, lookAtZ:-1},
+ menu: {x:0, y:5, z:30, lookAtX:0, lookAtY:3.5, lookAtZ:0}
+}
 
-            renderer.render(scene, camera);
-        }
-        animate();
+let targetPos={...cameraPositions.menu}
+let targetLook={x:0,y:0,z:0}
 
-        // Responsive
-        window.addEventListener('resize', () => {
-            camera.aspect = innerWidth / innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(innerWidth, innerHeight);
-        });
-    </script>
+function showSection(section){
+ document.querySelectorAll('.popup').forEach(p=>p.classList.remove('show'))
+ document.getElementById('popup-'+section).classList.add('show')
+ document.getElementById('mainMenu').classList.add('hide')
+ const index=sections.indexOf(section)
+ const nextBtn=document.querySelector('#popup-'+section+' .next-btn')
+ nextBtn.textContent=titles[index]
+ targetPos={...cameraPositions[section]}
+ targetLook={x:cameraPositions[section].lookAtX,y:cameraPositions[section].lookAtY,z:cameraPositions[section].lookAtZ}
+}
+
+function nextSection(current){
+ const index=sections.indexOf(current)
+ if(index<sections.length-1){
+   showSection(sections[index+1])
+ } else {
+   backToMenu()
+ }
+}
+
+function backToMenu(){
+ document.querySelectorAll('.popup').forEach(p=>p.classList.remove('show'))
+ document.getElementById('mainMenu').classList.remove('hide')
+ targetPos={...cameraPositions.menu}
+ targetLook={x:cameraPositions.menu.lookAtX,y:cameraPositions.menu.lookAtY,z:cameraPositions.menu.lookAtZ}
+}
+
+window.addEventListener('keydown',e=>{if(e.key==='Escape')backToMenu()})
+
+/* ANIMATE */
+function animate(){
+ requestAnimationFrame(animate)
+ rings.forEach((r,i)=>r.rotation.y+=0.002+i*0.001)
+ particles.rotation.y+=0.001
+
+ // smooth camera transition
+ camera.position.x+=(targetPos.x-camera.position.x)*0.05
+ camera.position.y+=(targetPos.y-camera.position.y)*0.05
+ camera.position.z+=(targetPos.z-camera.position.z)*0.05
+
+ // smooth lookAt transition for aesthetic angles
+ const lookAtX=camera.position.x+(targetLook.x-camera.position.x)*0.05
+ const lookAtY=camera.position.y+(targetLook.y-camera.position.y)*0.05
+ const lookAtZ=camera.position.z+(targetLook.z-camera.position.z)*0.05
+
+ camera.lookAt(lookAtX,lookAtY,lookAtZ)
+
+ renderer.render(scene,camera)
+}
+animate()
+
+window.addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight
+ camera.updateProjectionMatrix()
+ renderer.setSize(innerWidth,innerHeight)
+})
+</script>
+
 </body>
-
 </html>
-ability of the popups and prevent any overlap with the content. Adjust the content and styles further as needed to fit your design preferences.
