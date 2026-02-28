@@ -261,29 +261,76 @@ const renderer=new THREE.WebGLRenderer({antialias:true})
 renderer.setSize(innerWidth,innerHeight)
 document.body.appendChild(renderer.domElement)
 
-/* RINGS */
-const rings=[]
-for(let i=0;i<5;i++){
- const r=new THREE.Mesh(
-  new THREE.TorusGeometry(5+i*1.5,0.1,16,100),
-  new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.6,wireframe:true})
- )
- r.position.y=i*1.2-1
- rings.push(r)
- scene.add(r)
+/* COSMIC SPHERE */
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(6,64,64),
+  new THREE.MeshBasicMaterial({
+    color:0x223344,
+    emissive:0x114488,
+    transparent:true,
+    opacity:0.4,
+    side:THREE.DoubleSide
+  })
+);
+scene.add(sphere);
+
+/* helper for section labels */
+let currentLabel=null;
+function createTextSprite(message){
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.font='Bold 64px Orbitron';
+  const metrics=ctx.measureText(message);
+  canvas.width=metrics.width+20;
+  canvas.height=80;
+  ctx.font='Bold 64px Orbitron';
+  ctx.fillStyle='cyan';
+  ctx.fillText(message,10,64);
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.needsUpdate=true;
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true}));
+  sprite.scale.set(canvas.width/20,canvas.height/20,1);
+  return sprite;
 }
 
-/* PARTICLES */
-const particles=new THREE.Group()
-scene.add(particles)
-for(let i=0;i<600;i++){
- const p=new THREE.Mesh(
-  new THREE.SphereGeometry(.12,6,6),
-  new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.7})
- )
- p.position.set((Math.random()-.5)*40,(Math.random()-.5)*20,(Math.random()-.5)*40)
- particles.add(p)
+function showSection(section){
+  // remove previous label
+  if(currentLabel){
+    scene.remove(currentLabel);
+    currentLabel=null;
+  }
+  const index=sections.indexOf(section);
+  const title=titles[index];
+  currentLabel=createTextSprite(title);
+  currentLabel.position.set(0,3,-5);
+  scene.add(currentLabel);
+  document.querySelectorAll('.popup').forEach(p=>p.classList.remove('show'))
+  document.getElementById('popup-'+section).classList.add('show')
+  document.getElementById('mainMenu').classList.add('hide')
+  const nextBtn=document.querySelector('#popup-'+section+' .next-btn')
+  nextBtn.textContent=titles[index]
+  targetPos={...cameraPositions[section]}
+  targetLook={x:cameraPositions[section].lookAtX,y:cameraPositions[section].lookAtY,z:cameraPositions[section].lookAtZ}
+  // change sphere color slightly
+  sphere.material.emissive.setHex(0x110000 + Math.floor(Math.random()*0x004488));
 }
+
+// remove earlier showSection definition to avoid duplication
+
+/* STARS */
+const starGeom=new THREE.BufferGeometry();
+const starCount=1000;
+const positions=new Float32Array(starCount*3);
+for(let i=0;i<starCount;i++){
+  positions[i*3]=(Math.random()-.5)*200;
+  positions[i*3+1]=(Math.random()-.5)*200;
+  positions[i*3+2]=(Math.random()-.5)*200;
+}
+starGeom.setAttribute('position',new THREE.BufferAttribute(positions,3));
+const starMat=new THREE.PointsMaterial({color:0xffffff, size:0.5});
+const stars=new THREE.Points(starGeom,starMat);
+scene.add(stars);
+const particles=stars; // reuse variable later in animation
 
 /* WIRES */
 const wireMat=new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:.3})
@@ -309,22 +356,6 @@ const cameraPositions = {
 
 let targetPos={...cameraPositions.menu}
 let targetLook={x:0,y:0,z:0}
-
-function showSection(section){
- document.querySelectorAll('.popup').forEach(p=>p.classList.remove('show'))
- document.getElementById('popup-'+section).classList.add('show')
- document.getElementById('mainMenu').classList.add('hide')
- const index=sections.indexOf(section)
- const nextBtn=document.querySelector('#popup-'+section+' .next-btn')
- nextBtn.textContent=titles[index]
- targetPos={...cameraPositions[section]}
- targetLook={x:cameraPositions[section].lookAtX,y:cameraPositions[section].lookAtY,z:cameraPositions[section].lookAtZ}
- // change ring colors randomly on section change
- rings.forEach(r=>{
-   r.material.color.setHex(Math.random()*0xffffff);
- });
-}
-
 function nextSection(current){
  const index=sections.indexOf(current)
  if(index<sections.length-1){
@@ -346,9 +377,9 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape')backToMenu()})
 /* ANIMATE */
 function animate(){
  requestAnimationFrame(animate)
- rings.forEach((r,i)=>r.rotation.y+=0.002+i*0.001)
-  particles.rotation.y+=0.001 + mouseX
-  particles.rotation.x+=mouseY
+ sphere.rotation.y+=0.001;
+  particles.rotation.y+=0.0005 + mouseX;
+  particles.rotation.x+=mouseY;
  // smooth camera transition
  camera.position.x+=(targetPos.x-camera.position.x)*0.05
  camera.position.y+=(targetPos.y-camera.position.y)*0.05
