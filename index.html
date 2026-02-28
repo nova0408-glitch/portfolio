@@ -97,10 +97,68 @@ canvas{display:block}
  .holo-title{font-size:6vw}
  .holo-btn,.next-btn{font-size:5vw}
 }
+
+  /* LOGIN PANEL */
+  .login-panel{
+    position:absolute;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    padding:30px 50px;
+    border:2px solid magenta;
+    border-radius:14px;
+    background:rgba(255,0,255,0.08);
+    backdrop-filter:blur(10px);
+    text-align:center;
+    text-shadow:0 0 12px magenta;
+    z-index:7;
+    animation:float 3s ease-in-out infinite;
+    width:90%;
+    max-width:450px;
+    overflow:hidden;
+  }
+  .login-panel::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    animation:scan 2s infinite;
+    pointer-events:none;
+  }
+  @keyframes scan{
+    0%{transform:translateY(-100%);} 100%{transform:translateY(100%);}
+  }
+  .login-panel.hide{display:none}
+  .login-input{
+    width:80%;
+    padding:10px 12px;
+    margin:8px 0;
+    border:1px solid magenta;
+    border-radius:6px;
+    background:rgba(0,0,0,0.4);
+    color:#fff;
+    font-size:1rem;
+    outline:none;
+    text-shadow:0 0 4px magenta;
+  }
+  .login-error{
+    color:#ff4499;
+    margin-top:10px;
+  }
 </style>
 </head>
 
 <body>
+
+<!-- AUTHENTICATION PANEL -->
+<div class="holo-panel login-panel" id="loginPanel">
+  <div class="holo-title">ACCESS THE ORION NEXUS</div>
+  <input type="text" id="username" placeholder="Username" class="login-input">
+  <input type="password" id="password" placeholder="Password" class="login-input">
+  <div style="font-size:.8rem;color:#ffaaff;margin-bottom:8px;">(hint: orion / galaxy)</div>
+  <button class="holo-btn" onclick="checkLogin()">Enter Nexus</button>
+  <div id="loginError" class="login-error"></div>
+</div>
 
 <div class="holo-panel" id="mainMenu">
  <div class="holo-title">ORION version 1.0</div>
@@ -108,6 +166,7 @@ canvas{display:block}
  <button class="holo-btn" onclick="showSection('skills')">THE ARCHITECT</button>
  <button class="holo-btn" onclick="showSection('projects')">THE MISSION</button>
  <button class="holo-btn" onclick="showSection('contact')">THE CALL</button>
+ <button class="holo-btn" onclick="logout()" style="background:rgba(255,0,255,0.15);border-color:magenta;color:magenta;">LOGOUT</button>
 </div>
 
 <!-- POPUPS CONTENT -->
@@ -169,6 +228,46 @@ canvas{display:block}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+/* === AUTHENTICATION === */
+const VALID_USER = 'orion';
+const VALID_PASS = 'galaxy';
+
+function showLogin(){
+  document.getElementById('loginPanel').classList.remove('hide');
+  document.getElementById('mainMenu').classList.add('hide');
+}
+
+function showMenu(){
+  document.getElementById('loginPanel').classList.add('hide');
+  document.getElementById('mainMenu').classList.remove('hide');
+}
+
+function checkLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  const err=document.getElementById('loginError');
+  if(u===VALID_USER && p===VALID_PASS){
+    localStorage.setItem('auth','true');
+    err.textContent='';
+    showMenu();
+  } else {
+    err.textContent='Credentials not recognized';
+  }
+}
+
+function logout(){
+  localStorage.removeItem('auth');
+  showLogin();
+}
+
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('auth')==='true'){
+    showMenu();
+  } else {
+    showLogin();
+  }
+});
+
 /* === SCENE === */
 const scene=new THREE.Scene()
 const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000)
