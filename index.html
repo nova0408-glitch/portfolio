@@ -98,67 +98,43 @@ canvas{display:block}
  .holo-btn,.next-btn{font-size:5vw}
 }
 
-  /* LOGIN PANEL */
-  .login-panel{
-    position:absolute;
-    top:20%;
-    left:50%;
-    transform:translateX(-50%);
-    padding:30px 50px;
-    border:2px solid magenta;
-    border-radius:14px;
-    background:rgba(255,0,255,0.08);
-    backdrop-filter:blur(10px);
-    text-align:center;
-    text-shadow:0 0 12px magenta;
-    z-index:7;
-    animation:float 3s ease-in-out infinite;
-    width:90%;
-    max-width:450px;
-    overflow:hidden;
-  }
-  .login-panel::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
-    animation:scan 2s infinite;
+  /* title flicker */
+  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  .holo-title{animation:flicker 2s infinite;} 
+
+  /* CURSOR + OVERLAY */
+  .cursor{
+    position:fixed;
+    top:0;left:0;
+    width:20px;height:20px;
+    border:2px solid cyan;
+    border-radius:50%;
     pointer-events:none;
+    mix-blend-mode:exclusion;
+    transform:translate(-50%,-50%);
+    transition:width .2s,height .2s;
+    z-index:999;
   }
-  @keyframes scan{
-    0%{transform:translateY(-100%);} 100%{transform:translateY(100%);}
+  .scanlines{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,255,255,0.1) 2px);
+    animation:line 0.3s linear infinite;
+    mix-blend-mode:overlay;
+    z-index:10;
   }
-  .login-panel.hide{display:none}
-  .login-input{
-    width:80%;
-    padding:10px 12px;
-    margin:8px 0;
-    border:1px solid magenta;
-    border-radius:6px;
-    background:rgba(0,0,0,0.4);
-    color:#fff;
-    font-size:1rem;
-    outline:none;
-    text-shadow:0 0 4px magenta;
-  }
-  .login-error{
-    color:#ff4499;
-    margin-top:10px;
+  @keyframes line{
+    0%{background-position-y:0;}
+    100%{background-position-y:4px;}
   }
 </style>
 </head>
 
 <body>
 
-<!-- AUTHENTICATION PANEL -->
-<div class="holo-panel login-panel" id="loginPanel">
-  <div class="holo-title">ACCESS THE ORION NEXUS</div>
-  <input type="text" id="username" placeholder="Username" class="login-input">
-  <input type="password" id="password" placeholder="Password" class="login-input">
-  <div style="font-size:.8rem;color:#ffaaff;margin-bottom:8px;">(hint: orion / galaxy)</div>
-  <button class="holo-btn" onclick="checkLogin()">Enter Nexus</button>
-  <div id="loginError" class="login-error"></div>
-</div>
+<div class="scanlines"></div>
+<div class="cursor" id="cursor"></div>
 
 <div class="holo-panel" id="mainMenu">
  <div class="holo-title">ORION version 1.0</div>
@@ -166,7 +142,6 @@ canvas{display:block}
  <button class="holo-btn" onclick="showSection('skills')">THE ARCHITECT</button>
  <button class="holo-btn" onclick="showSection('projects')">THE MISSION</button>
  <button class="holo-btn" onclick="showSection('contact')">THE CALL</button>
- <button class="holo-btn" onclick="logout()" style="background:rgba(255,0,255,0.15);border-color:magenta;color:magenta;">LOGOUT</button>
 </div>
 
 <!-- POPUPS CONTENT -->
@@ -228,44 +203,53 @@ canvas{display:block}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* === AUTHENTICATION === */
-const VALID_USER = 'orion';
-const VALID_PASS = 'galaxy';
+/* === INTERACTIVITY & CURSOR === */
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.top = e.clientY + 'px';
+  cursor.style.left = e.clientX + 'px';
+});
 
-function showLogin(){
-  document.getElementById('loginPanel').classList.remove('hide');
-  document.getElementById('mainMenu').classList.add('hide');
-}
+// enlarge cursor when hovering over buttons
+Array.from(document.querySelectorAll('.holo-btn,.next-btn')).forEach(btn => {
+  btn.addEventListener('mouseenter', () => {
+    cursor.style.width = '40px';
+    cursor.style.height = '40px';
+  });
+  btn.addEventListener('mouseleave', () => {
+    cursor.style.width = '20px';
+    cursor.style.height = '20px';
+  });
+  // create ripple effect when clicked
+  btn.addEventListener('click', e => {
+    const ripple = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2,6,6),
+      new THREE.MeshBasicMaterial({color:0xff00ff,transparent:true,opacity:0.8})
+    );
+    const rect = e.target.getBoundingClientRect();
+    const x = (rect.left+rect.width/2 - innerWidth/2)/10;
+    const y = -(rect.top+rect.height/2 - innerHeight/2)/10;
+    ripple.position.set(x,y,0);
+    scene.add(ripple);
+    // animate and remove
+    let scale=1;
+    const grow = () => {
+      scale += 0.1;
+      ripple.scale.set(scale,scale,scale);
+      ripple.material.opacity -= 0.02;
+      if(ripple.material.opacity<=0) {
+        scene.remove(ripple);
+      } else requestAnimationFrame(grow);
+    };
+    grow();
+  });
+});
 
-function showMenu(){
-  document.getElementById('loginPanel').classList.add('hide');
-  document.getElementById('mainMenu').classList.remove('hide');
-}
-
-function checkLogin(){
-  const u=document.getElementById('username').value.trim();
-  const p=document.getElementById('password').value;
-  const err=document.getElementById('loginError');
-  if(u===VALID_USER && p===VALID_PASS){
-    localStorage.setItem('auth','true');
-    err.textContent='';
-    showMenu();
-  } else {
-    err.textContent='Credentials not recognized';
-  }
-}
-
-function logout(){
-  localStorage.removeItem('auth');
-  showLogin();
-}
-
-window.addEventListener('load',()=>{
-  if(localStorage.getItem('auth')==='true'){
-    showMenu();
-  } else {
-    showLogin();
-  }
+// track localized mouse movement for scene influence
+let mouseX=0, mouseY=0;
+document.addEventListener('mousemove', e => {
+  mouseX = (e.clientX-innerWidth/2)*0.002;
+  mouseY = (e.clientY-innerHeight/2)*0.002;
 });
 
 /* === SCENE === */
@@ -335,6 +319,10 @@ function showSection(section){
  nextBtn.textContent=titles[index]
  targetPos={...cameraPositions[section]}
  targetLook={x:cameraPositions[section].lookAtX,y:cameraPositions[section].lookAtY,z:cameraPositions[section].lookAtZ}
+ // change ring colors randomly on section change
+ rings.forEach(r=>{
+   r.material.color.setHex(Math.random()*0xffffff);
+ });
 }
 
 function nextSection(current){
@@ -359,8 +347,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape')backToMenu()})
 function animate(){
  requestAnimationFrame(animate)
  rings.forEach((r,i)=>r.rotation.y+=0.002+i*0.001)
- particles.rotation.y+=0.001
-
+  particles.rotation.y+=0.001 + mouseX
+  particles.rotation.x+=mouseY
  // smooth camera transition
  camera.position.x+=(targetPos.x-camera.position.x)*0.05
  camera.position.y+=(targetPos.y-camera.position.y)*0.05
