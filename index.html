@@ -8,7 +8,10 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{overflow:hidden;font-family:'Orbitron',sans-serif;background:#000;color:cyan}
+body{overflow:hidden;font-family:'Orbitron',sans-serif;background:radial-gradient(circle at center, #001a33, #000);
+    animation:bgcalm 20s infinite alternate;
+    color:#a0ffff} /* calmer navy with soft cyan text */
+  @keyframes bgcalm{0%{background:radial-gradient(circle at center,#001a33,#000);}100%{background:radial-gradient(circle at center,#002244,#000);}}
 canvas{display:block}
 
 /* HOLO PANEL */
@@ -45,23 +48,23 @@ canvas{display:block}
 .holo-btn,.next-btn{
  margin:8px;
  padding:10px 22px;
- background:rgba(0,255,255,0.15);
- border:1px solid cyan;
+ background:rgba(160,255,255,0.12);
+ border:1px solid #a0ffff;
  border-radius:8px;
- color:cyan;
+ color:#a0ffff;
  cursor:pointer;
- transition:.25s;
- text-shadow:0 0 5px cyan;
+ transition:.4s;
+ text-shadow:0 0 4px #a0ffff;
  width:100%;
  max-width:220px
-}
+} /* softened button colors */
 
 .holo-btn:hover,.next-btn:hover{
- background:cyan;
- color:black;
- box-shadow:0 0 22px cyan;
- transform:scale(1.05)
-}
+ background:#a0ffff;
+ color:#002233;
+ box-shadow:0 0 12px #a0ffff;
+ transform:scale(1.03)
+} /* gentler hover */
 
 /* POPUPS */
 .popup{
@@ -96,31 +99,31 @@ canvas{display:block}
 @media(max-width:600px){
  .holo-title{font-size:6vw}
  .holo-btn,.next-btn{font-size:5vw}
-}
+} /* responsive */
 
   /* title flicker */
-  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.6;}}
-  .holo-title{animation:flicker 2s infinite;} 
+  @keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.8;}}
+  .holo-title{animation:flicker 6s infinite;} 
 
   /* CURSOR + OVERLAY */
   .cursor{
     position:fixed;
     top:0;left:0;
     width:20px;height:20px;
-    border:2px solid cyan;
+    border:2px solid #a0ffff;
     border-radius:50%;
     pointer-events:none;
-    mix-blend-mode:exclusion;
+    mix-blend-mode:soft-light;
     transform:translate(-50%,-50%);
-    transition:width .2s,height .2s;
+    transition:width .3s,height .3s;
     z-index:999;
   }
   .scanlines{
     position:fixed;
     inset:0;
     pointer-events:none;
-    background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,255,255,0.1) 2px);
-    animation:line 0.3s linear infinite;
+    background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(160,255,255,0.05) 2px);
+    animation:line 1s linear infinite;
     mix-blend-mode:overlay;
     z-index:10;
   }
@@ -224,7 +227,7 @@ Array.from(document.querySelectorAll('.holo-btn,.next-btn')).forEach(btn => {
   btn.addEventListener('click', e => {
     const ripple = new THREE.Mesh(
       new THREE.SphereGeometry(0.2,6,6),
-      new THREE.MeshBasicMaterial({color:0xff00ff,transparent:true,opacity:0.8})
+      new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:0.6})
     );
     const rect = e.target.getBoundingClientRect();
     const x = (rect.left+rect.width/2 - innerWidth/2)/10;
@@ -312,7 +315,7 @@ function showSection(section){
   targetPos={...cameraPositions[section]}
   targetLook={x:cameraPositions[section].lookAtX,y:cameraPositions[section].lookAtY,z:cameraPositions[section].lookAtZ}
   // change sphere color slightly
-  sphere.material.emissive.setHex(0x110000 + Math.floor(Math.random()*0x004488));
+  sphere.material.emissive.setHex(0x002022 + Math.floor(Math.random()*0x002022)); /* soft green-blue shift */
 }
 
 // remove earlier showSection definition to avoid duplication
@@ -327,7 +330,7 @@ for(let i=0;i<starCount;i++){
   positions[i*3+2]=(Math.random()-.5)*200;
 }
 starGeom.setAttribute('position',new THREE.BufferAttribute(positions,3));
-const starMat=new THREE.PointsMaterial({color:0xffffff, size:0.5});
+const starMat=new THREE.PointsMaterial({color:0x88ccff, size:0.6}); /* light pastel stars */
 const stars=new THREE.Points(starGeom,starMat);
 scene.add(stars);
 const particles=stars; // reuse variable later in animation
@@ -377,9 +380,9 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape')backToMenu()})
 /* ANIMATE */
 function animate(){
  requestAnimationFrame(animate)
- sphere.rotation.y+=0.001;
-  particles.rotation.y+=0.0005 + mouseX;
-  particles.rotation.x+=mouseY;
+ sphere.rotation.y+=0.0003;
+  particles.rotation.y+=0.0002 + mouseX*0.3;
+  particles.rotation.x+=mouseY*0.3;
  // smooth camera transition
  camera.position.x+=(targetPos.x-camera.position.x)*0.05
  camera.position.y+=(targetPos.y-camera.position.y)*0.05
